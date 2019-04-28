@@ -4,6 +4,7 @@ import com.sun.org.apache.regexp.internal.RE;
 import io.javabrains.moviecatalogservice.models.CatalogItem;
 import io.javabrains.moviecatalogservice.models.Movie;
 import io.javabrains.moviecatalogservice.models.Rating;
+import io.javabrains.moviecatalogservice.models.UserRating;
 import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,30 +33,15 @@ public class MovieCatalogResource {
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 
         //get all rated movie IDs
-        List<Rating> ratings = Arrays.asList(
-                new Rating("1234",4),
-                new Rating("5678",3)
-        );
+        UserRating ratings = restTemplate.getForObject("http://localhost:8083/ratingdata/users/" + userId, UserRating.class);
 
-        //For each movie ID, call movie info service and get details
-        return ratings.stream().map(rating -> {
-            //Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
-
-            Movie movie = webClientBuilder.build()
-                    .get()
-                    .uri("http://localhost:8082/movies/" + rating.getMovieId())
-                    .retrieve()
-                    .bodyToMono(Movie.class)
-                    .block();
+        return ratings.getUserRating().stream().map(rating -> {
+            //For each movie ID, call movie info service and get details
+            Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
+            //Put them all together
             return   new CatalogItem(movie.getName(),"Test",rating.getRating());
         }).collect(Collectors.toList());
 
-
-
-        //Put them all together
-           /// return Collections.singletonList(
-           //         new CatalogItem("Transformers","Test",4)
-          //  );
 
     }
 }
