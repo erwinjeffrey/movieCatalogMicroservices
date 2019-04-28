@@ -2,6 +2,7 @@ package io.javabrains.moviecatalogservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -10,6 +11,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class MovieCatalogServiceApplication {
 
 	@Bean
+	// To communicate to eureka server, passing it a hint(servicename +uri) about the server that we want eureka to invoke
+	@LoadBalanced
 	public RestTemplate getResTemplate(){
 		return new RestTemplate();
 	}
